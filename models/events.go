@@ -160,3 +160,12 @@ func (event Event) CancelRegistration(userID string) error {
 		return err
 	})
 }
+
+func RegisterForEvent(eventID string, userID string) error {
+	query := `
+		INSERT INTO registrations (event_id, user_id)
+		VALUES (?, ?)
+	`
+	_, err := db.DB.Exec(query, eventID, userID)
+	return err
+}

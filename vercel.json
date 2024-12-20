@@ -14,11 +14,23 @@
   ],
   "routes": [
     {
-      "src": "/events",
+      "src": "/events(/[0-9]+)?",
       "dest": "/api/events/events.go"
     },
     {
-      "src": "/(login|signup)",
+      "src": "/events/[0-9]+/register",
+      "dest": "/api/registration/register.go"
+    },
+    {
+      "src": "/users",
+      "dest": "/api/auth/auth.go"
+    },
+    {
+      "src": "/users/[0-9]+",
+      "dest": "/api/auth/users.go"
+    },
+    {
+      "src": "/(login|signup|admin/login|admin/signup)",
       "dest": "/api/auth/auth.go"
     },
     {

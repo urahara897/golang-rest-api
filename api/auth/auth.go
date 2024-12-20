@@ -19,6 +19,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handleSignup(w, r)
 	case strings.HasSuffix(path, "/login"):
 		handleLogin(w, r)
+	case strings.HasPrefix(path, "/admin/signup"):
+		handleAdminSignup(w, r)
+	case strings.HasPrefix(path, "/admin/login"):
+		handleAdminLogin(w, r)
+	case strings.HasSuffix(path, "/users"):
+		handleUsers(w, r)
 	default:
 		http.Error(w, "Not found", http.StatusNotFound)
 	}
@@ -66,4 +72,63 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		"message": "Login successful",
 		"token":   token,
 	})
+}
+
+func handleAdminSignup(w http.ResponseWriter, r *http.Request) {
+	var admin models.Admin
+	if err := json.NewDecoder(r.Body).Decode(&admin); err != nil {
+		http.Error(w, "Invalid request data", http.StatusBadRequest)
+		return
+	}
+
+	if err := admin.Save(); err != nil {
+		http.Error(w, "Could not create admin", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Admin created successfully",
+		"admin":   admin,
+	})
+}
+
+func handleAdminLogin(w http.ResponseWriter, r *http.Request) {
+	var admin models.Admin
+	if err := json.NewDecoder(r.Body).Decode(&admin); err != nil {
+		http.Error(w, "Invalid request data", http.StatusBadRequest)
+		return
+	}
+
+	id, err := admin.ValidateCredentials()
+	if err != nil {
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
+
+	token, err := utils.GenerateToken(admin.Email, id)
+	if err != nil {
+		http.Error(w, "Could not generate token", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Login successful",
+		"token":   token,
+	})
+}
+
+func handleUsers(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	users, err := models.GetAllUsers()
+	if err != nil {
+		http.Error(w, "Could not fetch users", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
 } 
