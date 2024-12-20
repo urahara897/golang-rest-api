@@ -1,9 +1,88 @@
-> This is a series of api which mimic the backend of an event planner app.
+# Event Planner API
 
-> These apis are not hosted anywhere yet.
+This is a RESTful API backend for an event planner application built with Go.
 
-> Users can login, create an event,update and delete where other users can register and cancel their registration to the said event.
+## Live Demo
 
-> Admins can signup, login, delete users and events.
+The API is hosted on Vercel:
 
-> The code creates a database from sqllite from where the api data is fetched
+```
+https://eventplanner-eight.vercel.app
+```
+
+## Features
+
+### User Management
+
+- User signup and login
+- Admin signup and login
+- JWT-based authentication
+- Password hashing for security
+
+### Event Management
+
+- Create, read, update, and delete events
+- List all events
+- Get single event details
+- Event registration system
+- Cancel event registrations
+
+### Admin Features
+
+- View all users
+- Delete users
+- Manage events
+
+## Database Setup
+
+The application uses SQLite with two different configurations:
+
+### Local Development
+
+- Uses file-based SQLite database (`./data/app.db`)
+- Data persists between server restarts
+- Full CRUD functionality
+
+### Vercel Deployment
+
+- Uses in-memory SQLite database
+- Data is not persistent between API calls due to serverless architecture
+- Each function invocation creates a fresh database
+- Suitable for demo purposes
+
+## Why Data Persistence Differs
+
+### Local Development
+
+- Database file is stored on disk
+- Data persists between server restarts
+- All CRUD operations are permanent
+
+### Vercel (Production)
+
+- Serverless functions run in isolated environments
+- Each API call starts with a fresh in-memory database
+- Data resets between function calls because:
+  - Vercel's filesystem is read-only
+  - Serverless functions are stateless
+  - In-memory database exists only during function execution
+
+## API Routes
+
+- `/signup`, `/login` - User authentication
+- `/admin/signup`, `/admin/login` - Admin authentication
+- `/events` - Event management
+- `/events/:id/register` - Event registration
+- `/users` - User management (Admin only)
+
+## Technologies Used
+
+- Go
+- SQLite
+- JWT Authentication
+- Vercel Serverless Functions
+- Bcrypt for password hashing
+
+## Note
+
+This project is designed for demonstration purposes. For a production environment, consider using a persistent cloud database service instead of SQLite.
