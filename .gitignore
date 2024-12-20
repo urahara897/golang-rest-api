@@ -22,7 +22,7 @@ vscode/
 DS_Store
 humbs.db
 # Environment variables
-env
+
 env.local
 .env
 # Vercel
