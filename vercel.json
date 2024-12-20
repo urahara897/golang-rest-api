@@ -2,14 +2,32 @@
   "version": 2,
   "builds": [
     {
-      "src": "main.go",
-      "use": "@vercel/go"
+      "src": "api/*.go",
+      "use": "@vercel/go",
+      "config": {
+        "buildCommand": "CGO_ENABLED=1 go build -tags 'linux,sqlite_foreign_keys'",
+        "installCommand": "apt-get update && apt-get install -y gcc sqlite3 libsqlite3-dev && mkdir -p /mnt/data && chmod 777 /mnt/data"
+      }
     }
   ],
   "routes": [
     {
+      "src": "/api/events",
+      "dest": "/api/events.go"
+    },
+    {
+      "src": "/api/auth/(login|signup)",
+      "dest": "/api/auth.go"
+    },
+    {
       "src": "/(.*)",
-      "dest": "main.go"
+      "dest": "/api/index.go"
     }
-  ]
+  ],
+  "functions": {
+    "api/*.go": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 }

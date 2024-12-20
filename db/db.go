@@ -3,24 +3,66 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sync"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB
+var (
+	DB   *sql.DB
+	once sync.Once
+)
 
 func InitDB() {
-	var err error
-	DB, err = sql.Open("sqlite3", "api.db")
-	if err != nil {
-		fmt.Print(err)
-		panic("Could not connect to database")
-	}
+	once.Do(func() {
+		var err error
+		// Get database path from environment variable or use default
+		dbPath := os.Getenv("DB_PATH")
+		if dbPath == "" {
+			// For local development on Windows
+			if runtime.GOOS == "windows" {
+				dbPath = "./data/app.db"
+			} else {
+				// For Vercel deployment
+				dbPath = "/mnt/data/app.db"
+			}
+		}
+		
+		// Ensure directory exists
+		dbDir := filepath.Dir(dbPath)
+		if err := os.MkdirAll(dbDir, 0755); err != nil {
+			panic("Could not create database directory: " + err.Error())
+		}
+		
+		// Add SQLite parameters
+		dbPath = dbPath + "?cache=shared&mode=rwc"
+		
+		DB, err = sql.Open("sqlite3", dbPath)
+		if err != nil {
+			fmt.Print(err)
+			panic("Could not connect to database")
+		}
 
-	DB.SetMaxOpenConns(10)
-	DB.SetMaxIdleConns(5)
+		DB.SetMaxOpenConns(1) // Important for in-memory SQLite
+		DB.SetMaxIdleConns(1)
+		DB.SetConnMaxLifetime(time.Hour)
 
-	createTables()
+		_, err = DB.Exec("PRAGMA journal_mode=WAL")
+		if err != nil {
+			panic("Could not enable WAL mode: " + err.Error())
+		}
+
+		_, err = DB.Exec("PRAGMA busy_timeout=5000")
+		if err != nil {
+			panic("Could not set busy timeout: " + err.Error())
+		}
+
+		createTables()
+	})
 }
 
 func createTables() {
