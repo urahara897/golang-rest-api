@@ -24,7 +24,7 @@ humbs.db
 # Environment variables
 
 env.local
-
+.env
 # Vercel
 .vercel
 .env*.local
