@@ -1,14 +1,16 @@
-package api
+package events
 
 import (
 	"encoding/json"
-	"learn-golang/rest-api/middlewares"
+	"learn-golang/rest-api/db"
 	"learn-golang/rest-api/models"
 	"learn-golang/rest-api/utils"
 	"net/http"
 )
 
-var EventsHandler = middlewares.EnsureDB(func(w http.ResponseWriter, r *http.Request) {
+func Handler(w http.ResponseWriter, r *http.Request) {
+	db.InitDB()
+	
 	switch r.Method {
 	case http.MethodGet:
 		events, err := models.GetAllEvents()
@@ -19,7 +21,6 @@ var EventsHandler = middlewares.EnsureDB(func(w http.ResponseWriter, r *http.Req
 		json.NewEncoder(w).Encode(events)
 		
 	case http.MethodPost:
-		// Check authentication
 		token := r.Header.Get("Authorization")
 		if token == "" {
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
@@ -50,4 +51,4 @@ var EventsHandler = middlewares.EnsureDB(func(w http.ResponseWriter, r *http.Req
 			"event":   event,
 		})
 	}
-}) 
+} 

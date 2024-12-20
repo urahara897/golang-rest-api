@@ -1,15 +1,17 @@
-package api
+package auth
 
 import (
 	"encoding/json"
-	"learn-golang/rest-api/middlewares"
+	"learn-golang/rest-api/db"
 	"learn-golang/rest-api/models"
 	"learn-golang/rest-api/utils"
 	"net/http"
 	"strings"
 )
 
-var AuthHandler = middlewares.EnsureDB(func(w http.ResponseWriter, r *http.Request) {
+func Handler(w http.ResponseWriter, r *http.Request) {
+	db.InitDB()
+	
 	path := r.URL.Path
 	
 	switch {
@@ -20,7 +22,7 @@ var AuthHandler = middlewares.EnsureDB(func(w http.ResponseWriter, r *http.Reque
 	default:
 		http.Error(w, "Not found", http.StatusNotFound)
 	}
-})
+}
 
 func handleSignup(w http.ResponseWriter, r *http.Request) {
 	var user models.User

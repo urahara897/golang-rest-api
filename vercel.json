@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.go",
+      "src": "api/**/*.go",
       "use": "@vercel/go",
       "config": {
         "buildCommand": "go mod tidy && CGO_ENABLED=1 go build -tags 'linux,sqlite_foreign_keys'",
@@ -15,11 +15,11 @@
   "routes": [
     {
       "src": "/api/events",
-      "dest": "/api/events.go"
+      "dest": "/api/events/events.go"
     },
     {
       "src": "/api/auth/(login|signup)",
-      "dest": "/api/auth.go"
+      "dest": "/api/auth/auth.go"
     },
     {
       "src": "/(.*)",
