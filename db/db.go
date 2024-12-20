@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -17,8 +19,24 @@ var (
 func InitDB() {
 	once.Do(func() {
 		var err error
-		// Use in-memory database for Vercel
-		dbPath := ":memory:?cache=shared&mode=memory"
+		var dbPath string
+
+		// Check if running on Vercel
+		if os.Getenv("VERCEL") == "1" {
+			// Use in-memory database for Vercel
+			dbPath = ":memory:?cache=shared&mode=memory"
+		} else {
+			// Use file system for local development
+			dbPath = "./data/app.db"
+			
+			// Ensure directory exists locally
+			dbDir := filepath.Dir(dbPath)
+			if err := os.MkdirAll(dbDir, 0755); err != nil {
+				panic("Could not create database directory: " + err.Error())
+			}
+			
+			dbPath = dbPath + "?cache=shared&mode=rwc"
+		}
 		
 		DB, err = sql.Open("sqlite3", dbPath)
 		if err != nil {
