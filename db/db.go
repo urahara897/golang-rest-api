@@ -3,9 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
 	"sync"
 	"time"
 
@@ -20,26 +17,8 @@ var (
 func InitDB() {
 	once.Do(func() {
 		var err error
-		// Get database path from environment variable or use default
-		dbPath := os.Getenv("DB_PATH")
-		if dbPath == "" {
-			// For local development on Windows
-			if runtime.GOOS == "windows" {
-				dbPath = "./data/app.db"
-			} else {
-				// For Vercel deployment
-				dbPath = "/mnt/data/app.db"
-			}
-		}
-		
-		// Ensure directory exists
-		dbDir := filepath.Dir(dbPath)
-		if err := os.MkdirAll(dbDir, 0755); err != nil {
-			panic("Could not create database directory: " + err.Error())
-		}
-		
-		// Add SQLite parameters
-		dbPath = dbPath + "?cache=shared&mode=rwc"
+		// Use in-memory database for Vercel
+		dbPath := ":memory:?cache=shared&mode=memory"
 		
 		DB, err = sql.Open("sqlite3", dbPath)
 		if err != nil {
@@ -47,7 +26,7 @@ func InitDB() {
 			panic("Could not connect to database")
 		}
 
-		DB.SetMaxOpenConns(1) // Important for in-memory SQLite
+		DB.SetMaxOpenConns(1)
 		DB.SetMaxIdleConns(1)
 		DB.SetConnMaxLifetime(time.Hour)
 
