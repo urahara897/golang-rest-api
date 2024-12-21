@@ -82,6 +82,19 @@ The application uses SQLite with two different configurations:
 - JWT Authentication
 - Vercel Serverless Functions
 - Bcrypt for password hashing
+- Graceful Shutdown
+
+## Server Features
+
+### Graceful Shutdown
+
+The server implements graceful shutdown to ensure clean termination:
+
+- Handles SIGINT (Ctrl+C) and SIGTERM signals
+- Allows in-progress requests to complete
+- Closes database connections properly
+- Uses 5-second timeout for shutdown operations
+- Prevents new requests during shutdown
 
 ## Note
 
